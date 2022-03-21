@@ -63,33 +63,46 @@ class KustoConnectionStringBuilder:
         def parse(cls, key: str) -> "ValidKeywords":
             """Create a valid keyword."""
             key = key.lower().strip()
-            if key in ["data source", "addr", "address", "network address", "server"]:
+            if key in {"data source", "addr", "address", "network address", "server"}:
                 return cls.data_source
-            if key in ["aad user id"]:
+            if key in {"aad user id"}:
                 return cls.aad_user_id
-            if key in ["password", "pwd"]:
+            if key in {"password", "pwd"}:
                 return cls.password
-            if key in ["application client id", "appclientid"]:
+            if key in {"application client id", "appclientid"}:
                 return cls.application_client_id
-            if key in ["application key", "appkey"]:
+            if key in {"application key", "appkey"}:
                 return cls.application_key
-            if key in ["application certificate"]:
+            if key in {"application certificate"}:
                 return cls.application_certificate
-            if key in ["application certificate thumbprint"]:
+            if key in {"application certificate thumbprint"}:
                 return cls.application_certificate_thumbprint
-            if key in ["public application certificate"]:
+            if key in {"public application certificate"}:
                 return cls.public_application_certificate
-            if key in ["authority id", "authorityid", "authority", "tenantid", "tenant", "tid"]:
+            if key in {
+                "authority id",
+                "authorityid",
+                "authority",
+                "tenantid",
+                "tenant",
+                "tid",
+            }:
                 return cls.authority_id
-            if key in ["aad federated security", "federated security", "federated", "fed", "aadfed"]:
+            if key in {
+                "aad federated security",
+                "federated security",
+                "federated",
+                "fed",
+                "aadfed",
+            }:
                 return cls.aad_federated_security
-            if key in ["application token", "apptoken"]:
+            if key in {"application token", "apptoken"}:
                 return cls.application_token
-            if key in ["user token", "usertoken", "usrtoken"]:
+            if key in {"user token", "usertoken", "usrtoken"}:
                 return cls.user_token
-            if key in ["msi_auth"]:
+            if key in {"msi_auth"}:
                 return cls.msi_auth
-            if key in ["msi_type"]:
+            if key in {"msi_type"}:
                 return cls.msi_params
             raise KeyError(key)
 
@@ -135,7 +148,7 @@ class KustoConnectionStringBuilder:
         self._token_provider = None
         self._async_token_provider = None
         if connection_string is not None and "=" not in connection_string.partition(";")[0]:
-            connection_string = "Data Source=" + connection_string
+            connection_string = f"Data Source={connection_string}"
 
         self[self.ValidKeywords.authority_id] = "common"
 
@@ -150,13 +163,16 @@ class KustoConnectionStringBuilder:
                 elif value.strip() in ["False", "false"]:
                     self[keyword] = False
                 else:
-                    raise KeyError("Expected aad federated security to be bool. Recieved %s" % value)
+                    raise KeyError(f"Expected aad federated security to be bool. Recieved {value}")
 
     def __setitem__(self, key, value):
         try:
             keyword = key if isinstance(key, self.ValidKeywords) else self.ValidKeywords.parse(key)
         except KeyError:
-            raise KeyError("%s is not supported as an item in KustoConnectionStringBuilder" % key)
+            raise KeyError(
+                f"{key} is not supported as an item in KustoConnectionStringBuilder"
+            )
+
 
         if value is None:
             raise TypeError("Value cannot be None.")
@@ -165,11 +181,11 @@ class KustoConnectionStringBuilder:
             self._internal_dict[keyword] = value.strip()
         elif keyword.is_bool_type():
             if not isinstance(value, bool):
-                raise TypeError("Expected %s to be bool" % key)
+                raise TypeError(f"Expected {key} to be bool")
             self._internal_dict[keyword] = value
         elif keyword.is_dict_type():
             if not isinstance(value, dict):
-                raise TypeError("Expected %s to be dict" % key)
+                raise TypeError(f"Expected {key} to be dict")
             self._internal_dict[keyword] = value
         else:
             raise KeyError("KustoConnectionStringBuilder supports only bools and strings.")
@@ -366,17 +382,11 @@ class KustoConnectionStringBuilder:
         if object_id is not None:
             # Until we upgrade azure-identity to version 1.4.1, only client_id is excepted as a hint for user managed service identity
             raise ValueError("User Managed Service Identity with object_id is temporarily not supported by azure identity 1.3.1. Please use client_id instead.")
-            params["object_id"] = object_id
-            exclusive_pcount += 1
-
         if msi_res_id is not None:
             # Until we upgrade azure-identity to version 1.4.1, only client_id is excepted as a hint for user managed service identity
             raise ValueError(
                 "User Managed Service Identity with msi_res_id is temporarily not supported by azure identity 1.3.1. Please use client_id instead."
             )
-            params["msi_res_id"] = msi_res_id
-            exclusive_pcount += 1
-
         if exclusive_pcount > 1:
             raise ValueError("the following parameters are mutually exclusive and can not be provided at the same time: client_uid, object_id, msi_res_id")
 
@@ -708,7 +718,10 @@ class _KustoClientBase:
             if payload:
                 raise KustoServiceError("The ingestion endpoint does not exist. Please enable streaming ingestion on your cluster.", response) from exception
 
-            raise KustoServiceError("The requested endpoint '{}' does not exist.".format(endpoint), response) from exception
+            raise KustoServiceError(
+                f"The requested endpoint '{endpoint}' does not exist.", response
+            ) from exception
+
 
         if payload:
             raise KustoServiceError(
@@ -875,7 +888,7 @@ class KustoClient(_KustoClientBase):
         stream_format = stream_format.value if isinstance(stream_format, DataFormat) else DataFormat(stream_format.lower()).value
         endpoint = self._streaming_ingest_endpoint + database + "/" + table + "?streamFormat=" + stream_format
         if mapping_name is not None:
-            endpoint = endpoint + "&mappingName=" + mapping_name
+            endpoint = f'{endpoint}&mappingName={mapping_name}'
 
         self._execute(endpoint, database, None, stream, self._streaming_ingest_default_timeout, properties)
 

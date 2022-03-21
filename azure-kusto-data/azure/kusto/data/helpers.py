@@ -16,9 +16,8 @@ def to_pandas_timedelta(raw_value) -> "pandas.Timedelta":
         parts = raw_value.split(":")
         if "." not in parts[0]:
             return pd.to_timedelta(raw_value)
-        else:
-            formatted_value = raw_value.replace(".", " days ", 1)
-            return pd.to_timedelta(formatted_value)
+        formatted_value = raw_value.replace(".", " days ", 1)
+        return pd.to_timedelta(formatted_value)
 
 
 def dataframe_from_result_table(table: "KustoResultTable"):
@@ -34,7 +33,7 @@ def dataframe_from_result_table(table: "KustoResultTable"):
     from azure.kusto.data._models import KustoResultTable
 
     if not isinstance(table, KustoResultTable):
-        raise TypeError("Expected KustoResultTable got {}".format(type(table).__name__))
+        raise TypeError(f"Expected KustoResultTable got {type(table).__name__}")
 
     columns = [col.column_name for col in table.columns]
     frame = pd.DataFrame(table.raw_rows, columns=columns)

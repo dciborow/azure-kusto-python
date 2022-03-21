@@ -20,7 +20,7 @@ except:
 
 
 UUID_REGEX = "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
-BLOB_NAME_REGEX = "database__table__" + UUID_REGEX + "__dataset.csv.gz"
+BLOB_NAME_REGEX = f"database__table__{UUID_REGEX}__dataset.csv.gz"
 BLOB_URL_REGEX = "https://storageaccount.blob.core.windows.net/tempstorage/database__table__" + UUID_REGEX + "__dataset.csv.gz[?]sas"
 
 
@@ -56,20 +56,18 @@ class KustoStreamingIngestClientTests(unittest.TestCase):
         # ensure test can work when executed from within directories
         current_dir = os.getcwd()
         path_parts = ["azure-kusto-ingest", "tests", "input", "dataset.csv"]
-        missing_path_parts = []
-        for path_part in path_parts:
-            if path_part not in current_dir:
-                missing_path_parts.append(path_part)
+        missing_path_parts = [
+            path_part for path_part in path_parts if path_part not in current_dir
+        ]
 
         file_path = os.path.join(current_dir, *missing_path_parts)
 
         ingest_client.ingest_from_file(file_path, ingestion_properties=ingestion_properties)
 
         path_parts = ["azure-kusto-ingest", "tests", "input", "dataset.csv.gz"]
-        missing_path_parts = []
-        for path_part in path_parts:
-            if path_part not in current_dir:
-                missing_path_parts.append(path_part)
+        missing_path_parts = [
+            path_part for path_part in path_parts if path_part not in current_dir
+        ]
 
         file_path = os.path.join(current_dir, *missing_path_parts)
 
@@ -78,20 +76,18 @@ class KustoStreamingIngestClientTests(unittest.TestCase):
         ingestion_properties = IngestionProperties(database="database", table="table", data_format=DataFormat.JSON, ingestion_mapping_reference="JsonMapping")
 
         path_parts = ["azure-kusto-ingest", "tests", "input", "dataset.json"]
-        missing_path_parts = []
-        for path_part in path_parts:
-            if path_part not in current_dir:
-                missing_path_parts.append(path_part)
+        missing_path_parts = [
+            path_part for path_part in path_parts if path_part not in current_dir
+        ]
 
         file_path = os.path.join(current_dir, *missing_path_parts)
 
         ingest_client.ingest_from_file(file_path, ingestion_properties=ingestion_properties)
 
         path_parts = ["azure-kusto-ingest", "tests", "input", "dataset.jsonz.gz"]
-        missing_path_parts = []
-        for path_part in path_parts:
-            if path_part not in current_dir:
-                missing_path_parts.append(path_part)
+        missing_path_parts = [
+            path_part for path_part in path_parts if path_part not in current_dir
+        ]
 
         file_path = os.path.join(current_dir, *missing_path_parts)
 
@@ -100,10 +96,9 @@ class KustoStreamingIngestClientTests(unittest.TestCase):
         ingestion_properties = IngestionProperties(database="database", table="table", data_format=DataFormat.TSV)
 
         path_parts = ["azure-kusto-ingest", "tests", "input", "dataset.tsv"]
-        missing_path_parts = []
-        for path_part in path_parts:
-            if path_part not in current_dir:
-                missing_path_parts.append(path_part)
+        missing_path_parts = [
+            path_part for path_part in path_parts if path_part not in current_dir
+        ]
 
         file_path = os.path.join(current_dir, *missing_path_parts)
 

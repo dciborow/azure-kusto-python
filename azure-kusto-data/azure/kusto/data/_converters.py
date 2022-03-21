@@ -21,12 +21,7 @@ def to_timedelta(value):
     """Converts a string to a timedelta."""
     if isinstance(value, (int, float)):
         return timedelta(microseconds=(float(value) / 10))
-    match = _TIMESPAN_PATTERN.match(value)
-    if match:
-        if match.group(1) == "-":
-            factor = -1
-        else:
-            factor = 1
-        return factor * timedelta(days=int(match.group("d") or 0), hours=int(match.group("h")), minutes=int(match.group("m")), seconds=float(match.group("s")))
-    else:
-        raise ValueError("Timespan value '{}' cannot be decoded".format(value))
+    if not (match := _TIMESPAN_PATTERN.match(value)):
+        raise ValueError(f"Timespan value '{value}' cannot be decoded")
+    factor = -1 if match.group(1) == "-" else 1
+    return factor * timedelta(days=int(match.group("d") or 0), hours=int(match.group("h")), minutes=int(match.group("m")), seconds=float(match.group("s")))

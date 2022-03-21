@@ -40,9 +40,12 @@ class KustoResponseDataSet(metaclass=ABCMeta):
         """Returns primary results. If there is more than one returns a list."""
         if self.tables_count == 1:
             return self.tables
-        primary = list(filter(lambda x: x.table_kind == WellKnownDataSet.PrimaryResult, self.tables))
-
-        return primary
+        return list(
+            filter(
+                lambda x: x.table_kind == WellKnownDataSet.PrimaryResult,
+                self.tables,
+            )
+        )
 
     @property
     def errors_count(self) -> int:
@@ -67,13 +70,13 @@ class KustoResponseDataSet(metaclass=ABCMeta):
         query_status_table = next((t for t in self.tables if t.table_kind == WellKnownDataSet.QueryCompletionInformation), None)
         if not query_status_table:
             return []
-        result = []
-        for row in query_status_table:
-            if row[self._error_column] < 4:
-                result.append(
-                    "Please provide the following data to Kusto: CRID='{0}' Description:'{1}'".format(row[self._crid_column], row[self._status_column])
-                )
-        return result
+        return [
+            "Please provide the following data to Kusto: CRID='{0}' Description:'{1}'".format(
+                row[self._crid_column], row[self._status_column]
+            )
+            for row in query_status_table
+            if row[self._error_column] < 4
+        ]
 
     def __iter__(self):
         return iter(self.tables)

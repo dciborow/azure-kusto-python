@@ -88,8 +88,13 @@ class StatusQTests(unittest.TestCase):
         client = QueuedIngestClient("some-cluster")
 
         fake_peek = fake_peek_factory(
-            lambda queue_name, num_messages=1: [mock_message(success=True) for _ in range(0, num_messages)] if "qs" in queue_name else []
+            lambda queue_name, num_messages=1: [
+                mock_message(success=True) for _ in range(num_messages)
+            ]
+            if "qs" in queue_name
+            else []
         )
+
         with mock.patch.object(client._resource_manager, "get_successful_ingestions_queues") as mocked_get_success_qs, mock.patch.object(
             client._resource_manager, "get_failed_ingestions_queues"
         ) as mocked_get_failed_qs, mock.patch.object(QueueClient, "peek_messages", autospec=True, side_effect=fake_peek) as q_mock:
@@ -125,13 +130,17 @@ class StatusQTests(unittest.TestCase):
 
         fake_peek = fake_peek_factory(
             lambda queue_name, num_messages=1: [
-                mock_message(success=True) if "qs" in queue_name else mock_message(success=False) for _ in range(0, num_messages)
+                mock_message(success=True)
+                if "qs" in queue_name
+                else mock_message(success=False)
+                for _ in range(num_messages)
             ]
         )
 
+
         with mock.patch.object(client._resource_manager, "get_successful_ingestions_queues") as mocked_get_success_qs, mock.patch.object(
-            client._resource_manager, "get_failed_ingestions_queues"
-        ) as mocked_get_failed_qs, mock.patch.object(QueueClient, "peek_messages", autospec=True, side_effect=fake_peek) as q_mock:
+                client._resource_manager, "get_failed_ingestions_queues"
+            ) as mocked_get_failed_qs, mock.patch.object(QueueClient, "peek_messages", autospec=True, side_effect=fake_peek) as q_mock:
 
             fake_failed_queue1 = _ResourceUri(
                 "mocked_storage_account_f1",
@@ -166,10 +175,10 @@ class StatusQTests(unittest.TestCase):
             assert len(peek_success_actual) == 1
 
             for m in peek_failure_actual:
-                assert isinstance(m, FailureMessage) is True
+                assert isinstance(m, FailureMessage)
 
             for m in peek_success_actual:
-                assert isinstance(m, SuccessMessage) is True
+                assert isinstance(m, SuccessMessage)
 
             assert len(peek_failure_actual) == 6
 
@@ -189,9 +198,13 @@ class StatusQTests(unittest.TestCase):
 
         fake_receive = fake_receive_factory(
             lambda queue_name, num_messages=1: [
-                mock_message(success=True) if "qs" in queue_name else mock_message(success=False) for _ in range(0, num_messages)
+                mock_message(success=True)
+                if "qs" in queue_name
+                else mock_message(success=False)
+                for _ in range(num_messages)
             ]
         )
+
 
         with mock.patch.object(client._resource_manager, "get_successful_ingestions_queues") as mocked_get_success_qs, mock.patch.object(
             client._resource_manager, "get_failed_ingestions_queues"
@@ -260,8 +273,13 @@ class StatusQTests(unittest.TestCase):
         client = QueuedIngestClient("some-cluster")
 
         fake_receive = fake_receive_factory(
-            lambda queue_name, messages_per_page=1: [mock_message(success=False) for _ in range(0, messages_per_page)] if "1" in queue_name else []
+            lambda queue_name, messages_per_page=1: [
+                mock_message(success=False) for _ in range(messages_per_page)
+            ]
+            if "1" in queue_name
+            else []
         )
+
         with mock.patch.object(client._resource_manager, "get_successful_ingestions_queues"), mock.patch.object(
             client._resource_manager, "get_failed_ingestions_queues"
         ) as mocked_get_failed_qs, mock.patch.object(

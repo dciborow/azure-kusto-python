@@ -39,8 +39,10 @@ class TestE2E:
     @staticmethod
     def get_test_table_csv_mappings():
         """A method to define csv mappings to test table."""
-        mappings = list()
-        mappings.append(ColumnMapping(column_name="rownumber", column_type="int", ordinal=0))
+        mappings = [
+            ColumnMapping(column_name="rownumber", column_type="int", ordinal=0)
+        ]
+
         mappings.append(ColumnMapping(column_name="rowguid", column_type="string", ordinal=1))
         mappings.append(ColumnMapping(column_name="xdouble", column_type="real", ordinal=2))
         mappings.append(ColumnMapping(column_name="xfloat", column_type="real", ordinal=3))
@@ -64,8 +66,12 @@ class TestE2E:
     @staticmethod
     def test_table_json_mappings():
         """A method to define json mappings to test table."""
-        mappings = list()
-        mappings.append(ColumnMapping(column_name="rownumber", path="$.rownumber", column_type="int"))
+        mappings = [
+            ColumnMapping(
+                column_name="rownumber", path="$.rownumber", column_type="int"
+            )
+        ]
+
         mappings.append(ColumnMapping(column_name="rowguid", path="$.rowguid", column_type="string"))
         mappings.append(ColumnMapping(column_name="xdouble", path="$.xdouble", column_type="real"))
         mappings.append(ColumnMapping(column_name="xfloat", path="$.xfloat", column_type="real"))
@@ -115,10 +121,10 @@ class TestE2E:
     def get_file_path() -> str:
         current_dir = os.getcwd()
         path_parts = ["azure-kusto-ingest", "tests", "input"]
-        missing_path_parts = []
-        for path_part in path_parts:
-            if path_part not in current_dir:
-                missing_path_parts.append(path_part)
+        missing_path_parts = [
+            path_part for path_part in path_parts if path_part not in current_dir
+        ]
+
         return os.path.join(current_dir, *missing_path_parts)
 
     @classmethod
@@ -180,14 +186,12 @@ class TestE2E:
 
     @classmethod
     def teardown_class(cls):
-        cls.client.execute(cls.test_db, ".drop table {} ifexists".format(cls.test_table))
+        cls.client.execute(cls.test_db, f".drop table {cls.test_table} ifexists")
 
     @classmethod
     async def get_async_client(cls) -> AsyncKustoClient:
         async with cls.async_client_lock:
-            if cls.async_client:
-                return cls.async_client
-            return AsyncKustoClient(cls.engine_kcsb_from_env())
+            return cls.async_client or AsyncKustoClient(cls.engine_kcsb_from_env())
 
     # assertions
     @classmethod
@@ -198,7 +202,7 @@ class TestE2E:
             timeout -= 1
 
             try:
-                command = "{} | count".format(cls.test_table)
+                command = f"{cls.test_table} | count"
                 response = cls.client.execute(cls.test_db, command)
                 async_client = await cls.get_async_client()
                 response_from_async = await async_client.execute(cls.test_db, command)

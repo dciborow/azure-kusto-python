@@ -51,10 +51,16 @@ def mocked_requests_post(*args, **kwargs):
                 reason = self.reason
 
             if 400 <= self.status_code < 500:
-                http_error_msg = u"%s Client Error: %s for url: %s" % (self.status_code, reason, self.url)
+                http_error_msg = (
+                    f"{self.status_code} Client Error: {reason} for url: {self.url}"
+                )
+
 
             elif 500 <= self.status_code < 600:
-                http_error_msg = u"%s Server Error: %s for url: %s" % (self.status_code, reason, self.url)
+                http_error_msg = (
+                    f"{self.status_code} Server Error: {reason} for url: {self.url}"
+                )
+
 
             if http_error_msg:
                 raise HTTPError(http_error_msg, response=self)
@@ -93,7 +99,19 @@ def mocked_requests_post(*args, **kwargs):
     return MockResponse(None, 404, url)
 
 
-DIGIT_WORDS = [str("Zero"), str("One"), str("Two"), str("Three"), str("Four"), str("Five"), str("Six"), str("Seven"), str("Eight"), str("Nine"), str("ten")]
+DIGIT_WORDS = [
+    "Zero",
+    "One",
+    "Two",
+    "Three",
+    "Four",
+    "Five",
+    "Six",
+    "Seven",
+    "Eight",
+    "Nine",
+    "ten",
+]
 
 
 class KustoClientTestsMixin:
@@ -103,7 +121,7 @@ class KustoClientTestsMixin:
     def _assert_sanity_query_response(response):
         expected = {
             "rownumber": None,
-            "rowguid": str(""),
+            "rowguid": "",
             "xdouble": None,
             "xfloat": None,
             "xbool": None,
@@ -115,13 +133,14 @@ class KustoClientTestsMixin:
             "xuint32": None,
             "xuint64": None,
             "xdate": None,
-            "xsmalltext": str(""),
-            "xtext": str(""),
-            "xnumberAsText": str(""),
+            "xsmalltext": "",
+            "xtext": "",
+            "xnumberAsText": "",
             "xtime": None,
-            "xtextWithNulls": str(""),
-            "xdynamicWithNulls": str(""),
+            "xtextWithNulls": "",
+            "xdynamicWithNulls": "",
         }
+
         for row in response.primary_results[0]:
             assert row["rownumber"] == expected["rownumber"]
             assert row["rowguid"] == expected["rowguid"]
@@ -164,7 +183,10 @@ class KustoClientTestsMixin:
             assert isinstance(row["xdynamicWithNulls"], type(expected["xdynamicWithNulls"]))
 
             expected["rownumber"] = 0 if expected["rownumber"] is None else expected["rownumber"] + 1
-            expected["rowguid"] = str("0000000{0}-0000-0000-0001-020304050607".format(expected["rownumber"]))
+            expected["rowguid"] = "0000000{0}-0000-0000-0001-020304050607".format(
+                expected["rownumber"]
+            )
+
             expected["xdouble"] = round(float(0) if expected["xdouble"] is None else expected["xdouble"] + 1.0001, 4)
             expected["xfloat"] = round(float(0) if expected["xfloat"] is None else expected["xfloat"] + 1.01, 2)
             expected["xbool"] = False if expected["xbool"] is None else not expected["xbool"]
@@ -189,7 +211,7 @@ class KustoClientTestsMixin:
 
             # hacky tests - because time here is relative to previous row, after we pass a time where we have > 500 nanoseconds,
             # another microseconds digit is needed
-            if expected["rownumber"] + 1 == 6:
+            if expected["rownumber"] == 5:
                 next_time += timedelta(microseconds=1)
             expected["xtime"] = next_time
             if expected["xint16"] > 0:
@@ -199,9 +221,7 @@ class KustoClientTestsMixin:
     def _assert_sanity_control_command_response(response):
         assert len(response) == 1
         primary_table = response.primary_results[0]
-        row_count = 0
-        for _ in primary_table:
-            row_count += 1
+        row_count = sum(1 for _ in primary_table)
         assert row_count == 1
         result = primary_table[0]
         assert result["BuildVersion"] == "1.0.6693.14577"
@@ -215,7 +235,9 @@ class KustoClientTestsMixin:
 
         assert len(data_frame.columns) == 19
         expected_dict = {
-            "rownumber": Series([None, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]),
+            "rownumber": Series(
+                [None, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
+            ),
             "rowguid": Series(
                 [
                     "",
@@ -232,16 +254,61 @@ class KustoClientTestsMixin:
                 ],
                 dtype=object,
             ),
-            "xdouble": Series([None, 0.0, 1.0001, 2.0002, 3.0003, 4.0004, 5.0005, 6.0006, 7.0007, 8.0008, 9.0009]),
-            "xfloat": Series([None, 0.0, 1.01, 2.02, 3.03, 4.04, 5.05, 6.06, 7.07, 8.08, 9.09]),
-            "xbool": Series([None, False, True, False, True, False, True, False, True, False, True], dtype=bool),
-            "xint16": Series([None, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]),
-            "xint32": Series([None, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]),
-            "xint64": Series([None, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]),
-            "xuint8": Series([None, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]),
-            "xuint16": Series([None, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]),
-            "xuint32": Series([None, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]),
-            "xuint64": Series([None, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]),
+            "xdouble": Series(
+                [
+                    None,
+                    0.0,
+                    1.0001,
+                    2.0002,
+                    3.0003,
+                    4.0004,
+                    5.0005,
+                    6.0006,
+                    7.0007,
+                    8.0008,
+                    9.0009,
+                ]
+            ),
+            "xfloat": Series(
+                [None, 0.0, 1.01, 2.02, 3.03, 4.04, 5.05, 6.06, 7.07, 8.08, 9.09]
+            ),
+            "xbool": Series(
+                [
+                    None,
+                    False,
+                    True,
+                    False,
+                    True,
+                    False,
+                    True,
+                    False,
+                    True,
+                    False,
+                    True,
+                ],
+                dtype=bool,
+            ),
+            "xint16": Series(
+                [None, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
+            ),
+            "xint32": Series(
+                [None, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
+            ),
+            "xint64": Series(
+                [None, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
+            ),
+            "xuint8": Series(
+                [None, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
+            ),
+            "xuint16": Series(
+                [None, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
+            ),
+            "xuint32": Series(
+                [None, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
+            ),
+            "xuint64": Series(
+                [None, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
+            ),
             "xdate": Series(
                 [
                     pandas.to_datetime(None),
@@ -257,9 +324,42 @@ class KustoClientTestsMixin:
                     pandas.to_datetime("2023-01-01T01:01:01.0000009Z"),
                 ]
             ),
-            "xsmalltext": Series(["", "Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"], dtype=object),
-            "xtext": Series(["", "Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"], dtype=object),
-            "xnumberAsText": Series(["", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], dtype=object),
+            "xsmalltext": Series(
+                [
+                    "",
+                    "Zero",
+                    "One",
+                    "Two",
+                    "Three",
+                    "Four",
+                    "Five",
+                    "Six",
+                    "Seven",
+                    "Eight",
+                    "Nine",
+                ],
+                dtype=object,
+            ),
+            "xtext": Series(
+                [
+                    "",
+                    "Zero",
+                    "One",
+                    "Two",
+                    "Three",
+                    "Four",
+                    "Five",
+                    "Six",
+                    "Seven",
+                    "Eight",
+                    "Nine",
+                ],
+                dtype=object,
+            ),
+            "xnumberAsText": Series(
+                ["", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+                dtype=object,
+            ),
             "xtime": Series(
                 [
                     "NaT",
@@ -276,11 +376,13 @@ class KustoClientTestsMixin:
                 ],
                 dtype="timedelta64[ns]",
             ),
-            "xtextWithNulls": Series(["", "", "", "", "", "", "", "", "", "", ""], dtype=object),
+            "xtextWithNulls": Series(
+                ["", "", "", "", "", "", "", "", "", "", ""], dtype=object
+            ),
             "xdynamicWithNulls": Series(
                 [
-                    str(""),
-                    str(""),
+                    "",
+                    "",
                     {"rowId": 1, "arr": [0, 1]},
                     {"rowId": 2, "arr": [0, 2]},
                     {"rowId": 3, "arr": [0, 3]},
@@ -294,6 +396,7 @@ class KustoClientTestsMixin:
                 dtype=object,
             ),
         }
+
         columns = [
             "rownumber",
             "rowguid",

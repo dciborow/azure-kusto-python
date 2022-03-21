@@ -138,7 +138,7 @@ while True:
     if qs.success.is_empty() and qs.failure.is_empty():
         time.sleep(backoff)
         backoff = min(backoff * 2, MAX_BACKOFF)
-        print("No new messages. backing off for {} seconds".format(backoff))
+        print(f"No new messages. backing off for {backoff} seconds")
         continue
 
     backoff = 1
@@ -146,8 +146,8 @@ while True:
     success_messages = qs.success.pop(10)
     failure_messages = qs.failure.pop(10)
 
-    pprint.pprint("SUCCESS : {}".format(success_messages))
-    pprint.pprint("FAILURE : {}".format(failure_messages))
+    pprint.pprint(f"SUCCESS : {success_messages}")
+    pprint.pprint(f"FAILURE : {failure_messages}")
 
     # you can of course separate them and dump them into a file for follow up investigations
     with open("successes.log", "w+") as sf:

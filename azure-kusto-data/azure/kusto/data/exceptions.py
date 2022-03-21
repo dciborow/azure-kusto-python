@@ -64,7 +64,7 @@ class KustoAuthenticationError(KustoClientError):
         return repr(self)
 
     def __repr__(self):
-        return "KustoAuthenticationError('{}', '{}', '{}')".format(self.authentication_method, repr(self.exception), self.kwargs)
+        return f"KustoAuthenticationError('{self.authentication_method}', '{repr(self.exception)}', '{self.kwargs}')"
 
 
 class KustoAioSyntaxError(SyntaxError):

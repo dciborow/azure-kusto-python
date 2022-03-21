@@ -7,16 +7,18 @@ from datetime import datetime
 
 class _IngestionBlobInfo:
     def __init__(self, blob_descriptor: "BlobDescriptor", ingestion_properties: "IngestionProperties", auth_context=None):
-        self.properties = dict()
-        self.properties["BlobPath"] = blob_descriptor.path
-        self.properties["RawDataSize"] = blob_descriptor.size
-        self.properties["DatabaseName"] = ingestion_properties.database
-        self.properties["TableName"] = ingestion_properties.table
-        self.properties["RetainBlobOnSuccess"] = True
-        self.properties["FlushImmediately"] = ingestion_properties.flush_immediately
-        self.properties["IgnoreSizeLimit"] = False
-        self.properties["ReportLevel"] = ingestion_properties.report_level.value
-        self.properties["ReportMethod"] = ingestion_properties.report_method.value
+        self.properties = {
+            "BlobPath": blob_descriptor.path,
+            "RawDataSize": blob_descriptor.size,
+            "DatabaseName": ingestion_properties.database,
+            "TableName": ingestion_properties.table,
+            "RetainBlobOnSuccess": True,
+            "FlushImmediately": ingestion_properties.flush_immediately,
+            "IgnoreSizeLimit": False,
+            "ReportLevel": ingestion_properties.report_level.value,
+            "ReportMethod": ingestion_properties.report_method.value,
+        }
+
         self.properties["SourceMessageCreationTime"] = datetime.utcnow().isoformat()
         self.properties["Id"] = (
             str(blob_descriptor.source_id) if hasattr(blob_descriptor, "source_id") and blob_descriptor.source_id is not None else str(uuid.uuid4())
@@ -29,9 +31,15 @@ class _IngestionBlobInfo:
         if ingestion_properties.additional_tags:
             tags.extend(ingestion_properties.additional_tags)
         if ingestion_properties.drop_by_tags:
-            tags.extend(["drop-by:" + drop for drop in ingestion_properties.drop_by_tags])
+            tags.extend([f"drop-by:{drop}" for drop in ingestion_properties.drop_by_tags])
         if ingestion_properties.ingest_by_tags:
-            tags.extend(["ingest-by:" + ingest for ingest in ingestion_properties.ingest_by_tags])
+            tags.extend(
+                [
+                    f"ingest-by:{ingest}"
+                    for ingest in ingestion_properties.ingest_by_tags
+                ]
+            )
+
         if tags:
             additional_properties["tags"] = _convert_list_to_json(tags)
         if ingestion_properties.ingest_if_not_exists:

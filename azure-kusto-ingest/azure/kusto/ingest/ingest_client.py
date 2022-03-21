@@ -53,7 +53,7 @@ class QueuedIngestClient:
         from pandas import DataFrame
 
         if not isinstance(df, DataFrame):
-            raise ValueError("Expected DataFrame instance, found {}".format(type(df)))
+            raise ValueError(f"Expected DataFrame instance, found {type(df)}")
 
         file_name = "df_{id}_{timestamp}_{uid}.csv.gz".format(id=id(df), timestamp=int(time.time()), uid=uuid.uuid4())
         temp_file_path = os.path.join(tempfile.gettempdir(), file_name)
@@ -137,8 +137,8 @@ class QueuedIngestClient:
             if self._EXPECTED_SERVICE_TYPE != self._endpoint_service_type:
                 if not self._suggested_endpoint_uri:
                     self._suggested_endpoint_uri = self._generate_endpoint_suggestion(self._connection_datasource)
-                    if not self._suggested_endpoint_uri:
-                        raise KustoInvalidEndpointError(self._EXPECTED_SERVICE_TYPE, self._endpoint_service_type)
+                if not self._suggested_endpoint_uri:
+                    raise KustoInvalidEndpointError(self._EXPECTED_SERVICE_TYPE, self._endpoint_service_type)
                 raise KustoInvalidEndpointError(self._EXPECTED_SERVICE_TYPE, self._endpoint_service_type, self._suggested_endpoint_uri)
 
     def _retrieve_service_type(self):

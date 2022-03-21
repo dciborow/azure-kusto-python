@@ -2,6 +2,7 @@
 # Licensed under the MIT License
 """A simple example how to use KustoClient."""
 
+
 from datetime import timedelta
 
 from azure.kusto.data.exceptions import KustoServiceError
@@ -83,10 +84,10 @@ response = client.execute(db, query)
 # iterating over rows is possible
 for row in response.primary_results[0]:
     # printing specific columns by index
-    print("value at 0 {}".format(row[0]))
+    print(f"value at 0 {row[0]}")
     print("\n")
     # printing specific columns by name
-    print("EventType:{}".format(row["EventType"]))
+    print(f'EventType:{row["EventType"]}')
 
 # tables are serializeable, so:
 with open("results.json", "w+") as f:

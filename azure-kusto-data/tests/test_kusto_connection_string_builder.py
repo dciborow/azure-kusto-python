@@ -176,8 +176,15 @@ class KustoConnectionStringBuilderTests(unittest.TestCase):
         assert kcsb.application_key is None
         assert kcsb.user_token is None
         assert kcsb.authority_id == "common"
-        assert repr(kcsb) == "Data Source=localhost;AAD Federated Security=True;Authority Id=common;Application Token=%s" % token
-        assert str(kcsb) == "Data Source=localhost;AAD Federated Security=True;Authority Id=common;Application Token=%s" % self.PASSWORDS_REPLACEMENT
+        assert (
+            repr(kcsb)
+            == f"Data Source=localhost;AAD Federated Security=True;Authority Id=common;Application Token={token}"
+        )
+
+        assert (
+            str(kcsb)
+            == f"Data Source=localhost;AAD Federated Security=True;Authority Id=common;Application Token={self.PASSWORDS_REPLACEMENT}"
+        )
 
     def test_aad_user_token(self):
         """Checks kcsb that is created with AAD user token."""
@@ -192,8 +199,15 @@ class KustoConnectionStringBuilderTests(unittest.TestCase):
         assert kcsb.application_key is None
         assert kcsb.application_token is None
         assert kcsb.authority_id == "common"
-        assert repr(kcsb) == "Data Source=localhost;AAD Federated Security=True;Authority Id=common;User Token=%s" % token
-        assert str(kcsb) == "Data Source=localhost;AAD Federated Security=True;Authority Id=common;User Token=%s" % self.PASSWORDS_REPLACEMENT
+        assert (
+            repr(kcsb)
+            == f"Data Source=localhost;AAD Federated Security=True;Authority Id=common;User Token={token}"
+        )
+
+        assert (
+            str(kcsb)
+            == f"Data Source=localhost;AAD Federated Security=True;Authority Id=common;User Token={self.PASSWORDS_REPLACEMENT}"
+        )
 
     def test_add_msi(self):
         client_guid = "kjhjk"
@@ -210,7 +224,7 @@ class KustoConnectionStringBuilderTests(unittest.TestCase):
         except ValueError:
             exception_occurred = True
 
-        assert exception_occurred is True
+        assert exception_occurred
 
         exception_occurred = False
         try:
@@ -218,7 +232,7 @@ class KustoConnectionStringBuilderTests(unittest.TestCase):
         except ValueError:
             exception_occurred = True
 
-        assert exception_occurred is True
+        assert exception_occurred
 
         kcsb = [
             KustoConnectionStringBuilder.with_aad_managed_service_identity_authentication("localhost0", timeout=1),

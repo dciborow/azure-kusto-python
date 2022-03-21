@@ -77,10 +77,9 @@ class KustoResultRow:
     def __eq__(self, other):
         if len(self) != len(other):
             return False
-        for value_index, value in enumerate(self):
-            if value != other[value_index]:
-                return False
-        return True
+        return all(
+            value == other[value_index] for value_index, value in enumerate(self)
+        )
 
 
 class KustoResultColumn:
@@ -90,7 +89,7 @@ class KustoResultColumn:
         self.ordinal = ordinal
 
     def __repr__(self):
-        return "KustoResultColumn({},{})".format(json.dumps({"ColumnName": self.column_name, "ColumnType": self.column_type}), self.ordinal)
+        return f'KustoResultColumn({json.dumps({"ColumnName": self.column_name, "ColumnType": self.column_type})},{self.ordinal})'
 
 
 class KustoResultTable:
@@ -102,8 +101,7 @@ class KustoResultTable:
         self.table_kind = WellKnownDataSet[json_table["TableKind"]] if "TableKind" in json_table else None
         self.columns = [KustoResultColumn(column, index) for index, column in enumerate(json_table["Columns"])]
 
-        errors = [row for row in json_table["Rows"] if isinstance(row, dict)]
-        if errors:
+        if errors := [row for row in json_table["Rows"] if isinstance(row, dict)]:
             raise KustoServiceError(errors[0]["OneApiErrors"][0]["error"]["@message"], json_table)
 
         self.raw_columns = json_table["Columns"]

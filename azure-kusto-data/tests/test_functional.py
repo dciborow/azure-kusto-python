@@ -183,10 +183,25 @@ class FunctionalTests(unittest.TestCase):
         assert 1 == len(table)
 
         expected_table = [
-            [datetime(2016, 6, 6, 15, 35, tzinfo=tzutc()), "foo", 101, 3.14, False, timedelta(days=4, hours=1, minutes=2, seconds=3, milliseconds=567)],
-            [datetime(2016, 6, 7, 16, tzinfo=tzutc()), "bar", 555, 2.71, True, timedelta()],
-            [None, str(""), None, None, None, None],
+            [
+                datetime(2016, 6, 6, 15, 35, tzinfo=tzutc()),
+                "foo",
+                101,
+                3.14,
+                False,
+                timedelta(days=4, hours=1, minutes=2, seconds=3, milliseconds=567),
+            ],
+            [
+                datetime(2016, 6, 7, 16, tzinfo=tzutc()),
+                "bar",
+                555,
+                2.71,
+                True,
+                timedelta(),
+            ],
+            [None, "", None, None, None, None],
         ]
+
 
         columns = ["Timestamp", "Name", "Altitude", "Temperature", "IsFlying", "TimeFlying"]
 

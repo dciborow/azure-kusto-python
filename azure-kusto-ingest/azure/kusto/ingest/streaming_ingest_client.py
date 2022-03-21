@@ -40,7 +40,7 @@ class KustoStreamingIngestClient:
         from pandas import DataFrame
 
         if not isinstance(df, DataFrame):
-            raise ValueError("Expected DataFrame instance, found {}".format(type(df)))
+            raise ValueError(f"Expected DataFrame instance, found {type(df)}")
 
         file_name = "df_{timestamp}_{uid}.csv.gz".format(timestamp=int(time.time()), uid=uuid.uuid4())
         temp_file_path = os.path.join(tempfile.gettempdir(), file_name)

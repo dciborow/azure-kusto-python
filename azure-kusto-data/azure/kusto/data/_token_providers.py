@@ -112,7 +112,7 @@ class TokenProviderBase(abc.ABC):
             if self._cloud_info.login_mfa_required:
                 resource_uri = resource_uri.replace(".kusto.", ".kustomfa.")
 
-            self._scopes = [resource_uri + "/.default"]
+            self._scopes = [f'{resource_uri}/.default']
 
     def get_token(self):
         """Get a token silently from cache or authenticate if cached token is not found"""
@@ -173,16 +173,19 @@ class TokenProviderBase(abc.ABC):
 
     @staticmethod
     def _valid_token_or_none(token: dict) -> Optional[dict]:
-        if token is None or TokenConstants.MSAL_ERROR in token:
-            return None
-        return token
+        return None if token is None or TokenConstants.MSAL_ERROR in token else token
 
     def _valid_token_or_throw(self, token: dict, context: str = "") -> dict:
         if token is None:
-            raise KustoClientError(self.name() + " - failed to obtain a token. " + context)
+            raise KustoClientError(f'{self.name()} - failed to obtain a token. {context}')
 
         if TokenConstants.MSAL_ERROR in token:
-            message = self.name() + " - failed to obtain a token. " + context + "\n" + token[TokenConstants.MSAL_ERROR]
+            message = (
+                f'{self.name()} - failed to obtain a token. {context}'
+                + "\n"
+                + token[TokenConstants.MSAL_ERROR]
+            )
+
             if TokenConstants.MSAL_ERROR_DESCRIPTION in token:
                 message = message + "\n" + token[TokenConstants.MSAL_ERROR_DESCRIPTION]
 
@@ -469,11 +472,8 @@ class InteractiveLoginTokenProvider(TokenProviderBase):
         return self._valid_token_or_throw(token)
 
     def _get_token_from_cache_impl(self) -> dict:
-        account = None
         accounts = self._msal_client.get_accounts(self._login_hint)
-        if len(accounts) > 0:
-            account = accounts[0]
-
+        account = accounts[0] if len(accounts) > 0 else None
         token = self._msal_client.acquire_token_silent(scopes=self._scopes, account=account)
         return self._valid_token_or_none(token)
 

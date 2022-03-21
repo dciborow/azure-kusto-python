@@ -32,7 +32,7 @@ def travis_build_package():
     try:
         version = Version(travis_tag)
     except InvalidVersion:
-        failure = "Version must be a valid PEP440 version (version is: {})".format(version)
+        failure = f"Version must be a valid PEP440 version (version is: {version})"
         print(failure)
         return failure
 
@@ -41,12 +41,12 @@ def travis_build_package():
 
     print("Produced:\n{}".format(list(abs_dist_path.glob("*"))))
 
-    pattern = "*{}*".format(version)
+    pattern = f"*{version}*"
     packages = list(abs_dist_path.glob(pattern))
     if not packages:
-        return "Package version does not match tag {}, abort".format(version)
+        return f"Package version does not match tag {version}, abort"
     pypi_server = os.environ.get("PYPI_SERVER", "default PyPI server")
-    print("Package created as expected and will be pushed to {}".format(pypi_server))
+    print(f"Package created as expected and will be pushed to {pypi_server}")
 
 
 if __name__ == "__main__":
